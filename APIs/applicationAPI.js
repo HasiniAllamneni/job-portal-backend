@@ -56,5 +56,20 @@ applicationRouter.get('/apps/:jobId',verifyToken,allowedRoles("EMPLOYER"),async(
 
 //update status of an application
 applicationRouter.put('/apps/:appId/status',verifyToken,allowedRoles("EMPLOYER"),async(req,res)=>{
-
+    let appId = req.params.appId;
+    //get id of logged in employer
+    let currentEmpId = req.user.id;
+    let newStatus = req.body.status;
+    //get the application
+    let app = await ApplicationModel.findById(appId).populate("job","employer");
+    if(app===null) {
+        return res.status(404).json({success:false,message:"Application not found"});
+    }
+    //check if the job belongs to logged in employer
+    if(app.job.employer.toString()!==currentEmpId) {
+        return res.status(403).json({success:false,message:"You cannot update this application"});
+    }
+    app.status = newStatus;
+    await app.save();
+    res.status(200).json({success:true,message:"Application status updated",data:app});
 })

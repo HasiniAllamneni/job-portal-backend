@@ -88,3 +88,15 @@ jobRouter.delete('/myjobs/:jobId',verifyToken,allowedRoles("EMPLOYER"),async(req
     }
     res.status(200).json({success:true,message:"Job deleted",data:deletedJob})
 })
+
+//delete inappropriate job 
+jobRouter.delete('/jobs/:jobId',verifyToken,allowedRoles("ADMIN"),async(req,res)=>{
+    //get job id from url
+    let jobId = req.params.jobId
+    //delete the job 
+    let deletedJob = await JobModel.findByIdAndDelete(jobId)
+    if(deletedJob===null) {
+        return res.status(403).json({success:false,message:"Job not found"})
+    }
+    res.status(200).json({success:true,message:"Job deleted",data:deletedJob})
+})
