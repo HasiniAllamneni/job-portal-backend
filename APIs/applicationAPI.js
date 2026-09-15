@@ -36,7 +36,7 @@ applicationRouter.get('/apps/status',verifyToken,allowedRoles("JOBSEEKER"),async
     if(apps.length===0) {
         return res.status(404).json({success:false,message:"Application not found"})
     }
-    res.status(200).json({success:true,message:"Application found and status is",status:apps.status})
+    res.status(200).json({success:true,message:"Application found and status is",data:apps})
 })
 
 //view applications received for their job
@@ -45,7 +45,7 @@ applicationRouter.get('/apps/:jobId',verifyToken,allowedRoles("EMPLOYER"),async(
     let jobId = req.params.jobId
     let currentEmpId = req.user.id
     // Check whether the job belongs to the logged-in employer
-    let job = await JobModel.findOne({id:jobId,employer:currentEmpId})
+    let job = await JobModel.findOne({_id:jobId,employer:currentEmpId})
     if(job===null) {
         res.status(403).json({success:false,message:"You cannot access the applications of this job"})
     } else {
@@ -55,7 +55,7 @@ applicationRouter.get('/apps/:jobId',verifyToken,allowedRoles("EMPLOYER"),async(
 })
 
 //update status of an application
-applicationRouter.put('/apps/:appId/status',verifyToken,allowedRoles("EMPLOYER"),async(req,res)=>{
+applicationRouter.put('/apps/:appId',verifyToken,allowedRoles("EMPLOYER"),async(req,res)=>{
     let appId = req.params.appId;
     //get id of logged in employer
     let currentEmpId = req.user.id;

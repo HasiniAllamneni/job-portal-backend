@@ -61,7 +61,7 @@ userRouter.post('/users/logout', async(req,res)=>{
 })
 
 //view profile 
-userRouter.get('/users/:id',verifyToken,allowedRoles("JOBSEEKER","ADMIN"),async(req,res)=>{
+userRouter.get('/users/:id',verifyToken,allowedRoles("JOBSEEKER"),async(req,res)=>{
     //check logged in user id and id in url parameter are same or not
     let idOfParam=req.params.id
     let currentUserId=req.user.id
@@ -99,6 +99,18 @@ userRouter.put('/users/:id',verifyToken,allowedRoles("JOBSEEKER"),async(req,res)
     res.status(200).json({success:true,message:"User profile updated",data:updatedUser})
 })
 
+//view a user
+userRouter.get('/users/admin/:id',verifyToken,allowedRoles("ADMIN"),async(req,res)=>{
+    let userId = req.params.id
+    //get user by id
+    let user= await UserModel.findById(userId)
+    if(user===null) {
+        res.status(404).json({success:false,message:"User not found"})
+    } else {
+        res.status(200).json({success:true,message:"User found",data:user})
+    }
+})
+
 //view all users
 userRouter.get('/users',verifyToken,allowedRoles("ADMIN"),async(req,res)=>{
     //get all users
@@ -110,10 +122,10 @@ userRouter.get('/users',verifyToken,allowedRoles("ADMIN"),async(req,res)=>{
 userRouter.put('/users/status/:id',verifyToken,allowedRoles("ADMIN"),async(req,res)=>{
     //get user id from url
     let userId = req.params.id
-    let newStatus = req.body.status
+    let newStatus = req.body.active
     //update the status
     let updatedUser = await UserModel.findByIdAndUpdate(userId,
-        {$set:{status:newStatus}},
+        {$set:{active:newStatus}},
         {new:true,runValidators:true}
     )
     res.status(200).json({success:true,message:"User status updated",data:updatedUser})
